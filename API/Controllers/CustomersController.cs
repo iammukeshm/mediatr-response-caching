@@ -23,6 +23,7 @@ namespace API.Controllers
             var customer = await _mediator.Send(new GetCustomerQuery { Id = id, BypassCache = false });
             return Ok(customer);
         }
+
         [HttpGet]
         public async Task<IActionResult> GetCustomerList()
         {

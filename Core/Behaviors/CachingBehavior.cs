@@ -17,6 +17,7 @@ namespace Core.Behaviors
         private readonly IDistributedCache _cache;
         private readonly ILogger _logger;
         private readonly CacheSettings _settings;
+
         public CachingBehavior(IDistributedCache cache, ILogger<TResponse> logger, IOptions<CacheSettings> settings)
         {
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));

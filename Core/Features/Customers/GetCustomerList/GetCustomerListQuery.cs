@@ -4,7 +4,6 @@ using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +16,7 @@ namespace Core.Features.Customers.GetCustomerList
         public string CacheKey => $"CustomerList";
         public TimeSpan? SlidingExpiration { get; set; }
     }
+
     internal class GetCustomerListQueryHandler : IRequestHandler<GetCustomerListQuery, List<Customer>>
     {
         private readonly ICustomerService customerService;

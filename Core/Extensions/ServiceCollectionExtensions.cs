@@ -12,7 +12,7 @@ namespace Core.Extensions
         {
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
-            
+
             return services;
         }
     }
