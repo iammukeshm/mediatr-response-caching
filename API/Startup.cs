@@ -1,3 +1,7 @@
+using Core.Abstractions;
+using Core.Extensions;
+using Core.Settings;
+using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -18,15 +22,18 @@ namespace API
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            config = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration config { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddDistributedMemoryCache();
+            services.AddCoreLayer(config);
+            services.AddTransient<ICustomerService, CustomerService>();
+            services.Configure<CacheSettings>(config.GetSection("CacheSettings"));
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -41,7 +48,7 @@ namespace API
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MediatRReponseCaching v1"));
+                app.UseSwaggerUI(c => { c.DisplayRequestDuration(); c.SwaggerEndpoint("/swagger/v1/swagger.json", "MediatRReponseCaching v1"); });
             }
 
             app.UseHttpsRedirection();
