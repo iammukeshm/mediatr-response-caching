@@ -25,18 +25,18 @@ namespace Infrastructure
             new() { Id = 10, Contact = "124633892", Email = "dany@gmail.com", FirstName = "Dany", LastName = "Doe" }
         };
 
-        public Customer GetCustomer(int id)
-        {
-            //Assume Database Response takes 1000 ms
-            Thread.Sleep(1000);
-            return Customers.FirstOrDefault(c => c.Id == id);
-        }
-
         public IEnumerable<Customer> GetCustomerList()
         {
             //Assume Database Response takes 3000 ms
             Thread.Sleep(3000);
             return Customers;
+        }
+
+        public Customer GetCustomer(int id)
+        {
+            //Assume Database Response takes 1000 ms
+            Thread.Sleep(1000);
+            return Customers.FirstOrDefault(c => c.Id == id);
         }
     }
 }

@@ -1,14 +1,14 @@
-﻿using Core.Abstractions;
+﻿using System;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Core.Abstractions;
 using Core.Settings;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Core.Behaviors
 {
@@ -25,15 +25,19 @@ namespace Core.Behaviors
             _settings = settings.Value;
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
+            RequestHandlerDelegate<TResponse> next)
         {
             if (request is not ICacheableMediatrQuery cacheableQuery) return await next();
             TResponse response;
             if (cacheableQuery.BypassCache) return await next();
+
             async Task<TResponse> GetResponseAndAddToCache()
             {
                 response = await next();
-                var slidingExpiration = cacheableQuery.SlidingExpiration == null ? TimeSpan.FromHours(_settings.SlidingExpiration) : cacheableQuery.SlidingExpiration;
+                var slidingExpiration = cacheableQuery.SlidingExpiration == null
+                    ? TimeSpan.FromHours(_settings.SlidingExpiration)
+                    : cacheableQuery.SlidingExpiration;
                 var options = new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration };
                 var serializedData = Encoding.Default.GetBytes(JsonConvert.SerializeObject(response));
                 await _cache.SetAsync(cacheableQuery.CacheKey, serializedData, options, cancellationToken);
@@ -53,7 +57,6 @@ namespace Core.Behaviors
             }
 
             return response;
-
         }
     }
 }
