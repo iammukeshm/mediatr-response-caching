@@ -27,38 +27,33 @@ namespace Core.Behaviors
 
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
-            if (request is ICacheableMediatrQuery cacheableQuery)
+            if (request is not ICacheableMediatrQuery cacheableQuery) return await next();
+            TResponse response;
+            if (cacheableQuery.BypassCache) return await next();
+            async Task<TResponse> GetResponseAndAddToCache()
             {
-                TResponse response;
-                if (cacheableQuery.BypassCache) return await next();
-                async Task<TResponse> GetResponseAndAddToCache()
-                {
-                    response = await next();
-                    var slidingExpiration = cacheableQuery.SlidingExpiration == null ? TimeSpan.FromHours(_settings.SlidingExpiration) : cacheableQuery.SlidingExpiration;
-                    var options = new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration };
-                    var serializedData = Encoding.Default.GetBytes(JsonConvert.SerializeObject(response));
-                    await _cache.SetAsync(cacheableQuery.CacheKey, serializedData, options, cancellationToken);
-                    return response;
-                }
-
-                var cachedResponse = await _cache.GetAsync(cacheableQuery.CacheKey, cancellationToken);
-                if (cachedResponse != null)
-                {
-                    response = JsonConvert.DeserializeObject<TResponse>(Encoding.Default.GetString(cachedResponse));
-                    _logger.LogInformation($"Fetched from Cache -> '{cacheableQuery.CacheKey}'.");
-                }
-                else
-                {
-                    response = await GetResponseAndAddToCache();
-                    _logger.LogInformation($"Added to Cache -> '{cacheableQuery.CacheKey}'.");
-                }
-
+                response = await next();
+                var slidingExpiration = cacheableQuery.SlidingExpiration == null ? TimeSpan.FromHours(_settings.SlidingExpiration) : cacheableQuery.SlidingExpiration;
+                var options = new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration };
+                var serializedData = Encoding.Default.GetBytes(JsonConvert.SerializeObject(response));
+                await _cache.SetAsync(cacheableQuery.CacheKey, serializedData, options, cancellationToken);
                 return response;
+            }
+
+            var cachedResponse = await _cache.GetAsync(cacheableQuery.CacheKey, cancellationToken);
+            if (cachedResponse != null)
+            {
+                response = JsonConvert.DeserializeObject<TResponse>(Encoding.Default.GetString(cachedResponse));
+                _logger.LogInformation($"Fetched from Cache -> '{cacheableQuery.CacheKey}'.");
             }
             else
             {
-                return await next();
+                response = await GetResponseAndAddToCache();
+                _logger.LogInformation($"Added to Cache -> '{cacheableQuery.CacheKey}'.");
             }
+
+            return response;
+
         }
     }
 }
