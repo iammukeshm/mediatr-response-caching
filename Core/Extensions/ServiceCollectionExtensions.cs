@@ -1,8 +1,8 @@
-﻿using Core.Behaviors;
+﻿using System.Reflection;
+using Core.Behaviors;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace Core.Extensions
 {
@@ -12,7 +12,6 @@ namespace Core.Extensions
         {
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
-
             return services;
         }
     }

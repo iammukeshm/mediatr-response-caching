@@ -1,9 +1,9 @@
-﻿using Core.Abstractions;
-using Core.Entities;
-using MediatR;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Core.Abstractions;
+using Core.Entities;
+using MediatR;
 
 namespace Core.Features.Customers.GetCustomer
 {
@@ -24,10 +24,10 @@ namespace Core.Features.Customers.GetCustomer
             this.customerService = customerService;
         }
 
-        public async Task<Customer> Handle(GetCustomerQuery request, CancellationToken cancellationToken)
+        public Task<Customer> Handle(GetCustomerQuery request, CancellationToken cancellationToken)
         {
-            var cutomer = customerService.GetCustomer(request.Id);
-            return cutomer;
+            var customer = customerService.GetCustomer(request.Id);
+            return Task.FromResult(customer);
         }
     }
 }

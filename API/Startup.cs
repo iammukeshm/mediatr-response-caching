@@ -23,6 +23,7 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // services.AddDbContext();
             services.AddDistributedMemoryCache();
             services.AddCoreLayer(config);
             services.AddTransient<ICustomerService, CustomerService>();
@@ -41,7 +42,11 @@ namespace API
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => { c.DisplayRequestDuration(); c.SwaggerEndpoint("/swagger/v1/swagger.json", "MediatRReponseCaching v1"); });
+                app.UseSwaggerUI(c =>
+                {
+                    c.DisplayRequestDuration();
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MediatRReponseCaching v1");
+                });
             }
 
             app.UseHttpsRedirection();
@@ -50,10 +55,7 @@ namespace API
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }
